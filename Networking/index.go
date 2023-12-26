@@ -45,15 +45,20 @@ func (i *index) changePlayerGame(p player, newGameID uint8) { //Might have to pa
 
 	// Deleting the player from their original game
 	// bit convoluted but we go through the index to the game and then delete the player from that playermap.
-	delete(i.gameMap[p.game].playerMap, p.ID)
+	delete(i.gameMap[p.Game].playerMap, p.ID)
 
 	// putting the player in the new player map.
 	i.gameMap[newGameID].playerMap[p.ID] = p
 
 	//Assigning the player their new game
 
-	p.game = newGameID
+	p.Game = newGameID
 
+}
+
+func (i *index) getPlayerEnemies(p player) []player {
+	//game already has the function defined so it's a matter of getting the game the user is in
+	return (i.gameMap[p.Game].retrieveOpponents(p.ID))
 }
 
 func (i *index) generateGame() *game {

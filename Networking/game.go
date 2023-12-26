@@ -22,7 +22,7 @@ func (g *game) removePlayer(playerID uint16) {
 	// Could cause problems because i'm not sure if that's deleting value or key.
 }
 
-func (g game) retrieveOpponents(playerID uint16) {
+func (g game) retrieveOpponents(playerID uint16) []player {
 	players := []player{}
 	for key, value := range g.playerMap {
 		if key != playerID {
@@ -30,5 +30,6 @@ func (g game) retrieveOpponents(playerID uint16) {
 		}
 
 	}
+	return players
 
 }
