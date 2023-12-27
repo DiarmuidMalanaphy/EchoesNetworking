@@ -13,7 +13,7 @@ type index struct {
 func newIndex() *index {
 	i := index{
 		playerMap:    make(map[uint16]player),
-		nextPlayerID: 0,
+		nextPlayerID: 1,
 		gameMap:      make(map[uint8]game),
 		nextGameID:   1,
 	}

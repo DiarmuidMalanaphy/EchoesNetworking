@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 type game struct {
 	ID        uint8
 	playerMap map[uint16]player
@@ -30,6 +32,7 @@ func (g game) retrieveOpponents(playerID uint16) []player {
 		}
 
 	}
+	fmt.Println(players)
 	return players
 
 }

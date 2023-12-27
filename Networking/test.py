@@ -21,7 +21,7 @@ def deserialise_player(data):
     unpacked_data = struct.unpack(format_string, data)
     return unpacked_data
 
-def send_request(host, port, request_type, player):
+def send_request( request_type, player):
     with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
         try:
             # Serialize the player data
@@ -68,6 +68,7 @@ def send_request(host, port, request_type, player):
             print(f"Socket error: {e}")
         except Exception as e:
             print(f"Other exception: {e}")
+
 
 
 

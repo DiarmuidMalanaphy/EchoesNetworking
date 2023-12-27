@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/binary"
-	"fmt"
 	"io"
 	"net"
 )
@@ -47,7 +46,7 @@ func serialisePlayers(players []player) ([]byte, error) {
 func deserialisePlayers(data []byte) ([]player, error) {
 	var players []player
 	buf := bytes.NewReader(data)
-	fmt.Printf("Received data length: %d bytes\n", len(data))
+	// fmt.Printf("Received data length: %d bytes\n", len(data))
 
 	for {
 		var p player
@@ -63,6 +62,7 @@ func deserialisePlayers(data []byte) ([]player, error) {
 	return players, nil
 }
 
+// Type 1byte -> PayloadLength -> 4bytes -> PayloadBytes -> payload length to end.
 func serialiseRequest(req Request) ([]byte, error) {
 	buf := new(bytes.Buffer)
 
