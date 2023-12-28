@@ -1,9 +1,10 @@
 import socket
 import struct
 import time
-from playerPayload import PlayerPayload
+from .playerPayload import PlayerPayload
 
-from requestType import RequestType
+from .requestType import RequestType
+from .standardFormats import StandardFormats
 
 
 class Networking:
@@ -19,22 +20,106 @@ class Networking:
 
     def send_update_player_request(self,player):
         # player_data = self.serialise_player(player)
-        _,player_data = self.serialize_payload(player,"=HBHHhBhh")
+        _,player_data = self.serialize_payload(player,StandardFormats.Player.value)
         response = self.__send_general_payload_request(RequestType.UpdatePlayer.value,player_data)
+        type, _ , payload = self.deserialise_request(response)
+        if type == 255:
+            return(None)
+        payload = self.deserialize_payload(payload,StandardFormats.Player.value)
         
-        payload = self.deserialise_player(response)
-        for enemy in payload:
-            print(player[0],"'s enemy is ",enemy[0])
+        # for enemy in payload:
+            # print(player.ID,"'s enemy is ",enemy[0])
+        return(payload) #Returns a list of enemies
 
     def send_initialise_player_request(self,player):
         # player_data = self.serialise_player(player)
-        _,player_data = self.serialize_payload(player,"=HBHHhBhh")
+        _,player_data = self.serialize_payload(player,StandardFormats.Player.value)
         response = self.__send_general_payload_request(RequestType.InitialisePlayer.value,player_data)
+        type, _ , payload = self.deserialise_request(response)
+        if type == 255:
+            return(None)
+        # Handle type errors later.
+        player_payload = self.deserialize_payload(payload,StandardFormats.Player.value)
+        return(player_payload)
+    
+    def send_remove_player_request(self,player):
+        _,player_data = self.serialize_payload(player,StandardFormats.Player.value)
+        response = self.__send_general_payload_request(RequestType.RemovePlayer.value,player_data)
+        type, _ , payload = self.deserialise_request(response)
+        if type == 255:
+            return(None)
+        # Handle type errors later.
+        player_payload = self.deserialize_payload(payload,"B")
+        return(player_payload)
+    
+    def send_initialise_game_request(self):
+        _, game_data = self.serialize_payload((1,1),"=BB")
+        response = self.__send_general_payload_request(RequestType.InitialiseGame.value,game_data)
+        type, _ , payload = self.deserialise_request(response)
+        gameID = self.deserialize_payload(payload,"B")[0][0]
         
-        
-        payload = self.deserialise_player(response)
-        
-        return(payload)
+        return(gameID)
+    
+    def send_initialise_projectile_request(self,projectile): # <- on initialisation
+        _,player_data = self.serialize_payload(projectile,StandardFormats.Projectile.value)
+        response = self.__send_general_payload_request(RequestType.InitialiseProjectile.value,player_data)
+        type, _ , payload = self.deserialise_request(response)
+        if type == 255:
+            return(None)
+        projectile_payload = self.deserialize_payload(payload,StandardFormats.Projectile.value)
+        return(projectile_payload)
+    
+    def send_update_projectiles_request(self, projectiles):
+        # Ensure 'projectiles' is a list
+        if not isinstance(projectiles, list):
+            projectiles = [projectiles]
+
+        # Serialize each projectile and collect only the byte streams
+        serialized_projectiles = [self.serialize_payload(proj, StandardFormats.Projectile.value)[1] for proj in projectiles]
+
+        # Concatenate all byte streams into a single byte stream
+        combined_serialized_data = b''.join(serialized_projectiles)
+
+        # Send the combined byte stream
+        response = self.__send_general_payload_request(RequestType.UpdateProjectiles.value, combined_serialized_data)
+        type, _, payload = self.deserialise_request(response)
+
+        if type == 255:
+            return None
+
+        projectile_payloads = self.deserialize_payload(payload, StandardFormats.Projectile.value)
+        return projectile_payloads
+    
+    def send_request_projectiles_request(self,player): # Request all projectiles
+        _,player_data = self.serialize_payload(player,StandardFormats.Player.value)
+        response = self.__send_general_payload_request(RequestType.RequestProjectileInformation.value,player_data)
+        type, _ , payload = self.deserialise_request(response)
+        if type == 255:
+            return(None)
+        player_payload = self.deserialize_payload(payload,StandardFormats.Projectile.value)
+        return(player_payload)
+    
+    def send_remove_projectile_request(self, projectiles):
+        # Ensure 'projectiles' is a list
+        if not isinstance(projectiles, list):
+            projectiles = [projectiles]
+
+        # Serialize each projectile and collect only the byte streams
+        serialized_projectiles = [self.serialize_payload(proj, StandardFormats.Projectile.value)[1] for proj in projectiles]
+
+        # Concatenate all byte streams into a single byte stream
+        combined_serialized_data = b''.join(serialized_projectiles)
+
+        # Send the combined byte stream
+        response = self.__send_general_payload_request(RequestType.RemoveProjectiles.value, combined_serialized_data)
+        type, _, payload = self.deserialise_request(response)
+
+        if type == 255:
+            return False
+        return True
+    
+
+
     
     def __send_general_payload_request(self,request_type,payload):
         # for more extensive documentation read __send_player_request
@@ -50,15 +135,20 @@ class Networking:
                 # It's to do with the way binarisation works in go, you have to define a fixed size because binarisation does not like unknown sized onjects
                 # for generalisation i had to make the payload an undefined size in go, but i have to keep a standard.
                 payload_length = len(payload)
-                request_data = struct.pack('=BI', request_type, payload_length) + payload
+                request_data = struct.pack(StandardFormats.RequestHeader.value, request_type, payload_length) + payload
                 # 'B' for request type (uint8) and 'I' for payload length (int32)
+                # The byte length should be 19
+                 # Player length should be 14 + 1(type) + payload length (4)
+                
+
+                #
                 sock.sendto(request_data, (self.hostIP, self.hostPort))
-                start_time = time.time()
+                #start_time = time.time()
                 try:
                     response = sock.recv(1024)
-                    end_time = time.time()
+                    #end_time = time.time()
             
-                    print(f"Round-trip time: {end_time - start_time} seconds")
+                    #print(f"Round-trip time: {end_time - start_time} seconds")
                     
                     
                     return(response)
@@ -71,20 +161,13 @@ class Networking:
                 print(f"Socket error: {e}")
             except Exception as e:
                 print(f"Other exception: {e}")
-                
-                
-
-
-
-
-    def serialise_player(self, player):
-        return struct.pack('=HBHHhBhh', *player)
     
     
     
 
     def serialize_payload(self,payload, format_string):
         # Ensure the format string starts with '='
+        
         if not format_string.startswith('='):
             format_string = '=' + format_string
 
@@ -105,7 +188,7 @@ class Networking:
         
 
 
-    def deserialize_payload(serialized_data, single_item_format):
+    def deserialize_payload(self,serialized_data, single_item_format):
         # Ensure the format string starts with '='
         if not single_item_format.startswith('='):
             single_item_format = '=' + single_item_format
@@ -135,44 +218,20 @@ class Networking:
     def deserialise_request(self, request_data):
         # Unpack the first 5 bytes for Type and payloadLength
         
-        type, payload_length = struct.unpack('=BI', request_data[:5])
+        type, payload_length = struct.unpack(StandardFormats.RequestHeader.value, request_data[:5])
 
         # Extract the payload using the payload_length
         payload = request_data[5:5+payload_length]
 
         return (type, payload_length, payload)
 
-    
-
-    def deserialise_player(self, data):
-        format_string = '=HBHHhBhh'
-        
-        type, _ , payload = self.deserialise_request(data)
-        #print(type)
-        
-        players = []
-        if type == 200:  # Replace 200 with the actual type you're checking for
-            # Calculate the size of a single player's data
-            player_size = struct.calcsize(format_string)
-
-            # Iterate over the payload in chunks of player_size
-            for i in range(0, len(payload), player_size):
-                # Extract a chunk of player data
-                player_data = payload[i:i + player_size]
-                # Unpack and append the player data to the list
-                unpacked_data = struct.unpack(format_string, player_data)
-                players.append(unpacked_data)
-
-            return players
-        return(None)
-    
 
 if __name__ == "__main__":
     health = 1 # -> modify health for validation that data has transferred across
     player1 = PlayerPayload(1,100,100,health,1)  # default data 
     health = 2 # -> modify health for validation that data has transferred across
     player2 = PlayerPayload(2,100,100,health,1)  # default data 
-    print(player2.health)
+    
 
 
     networkingTool = Networking("127.0.0.1")
@@ -188,4 +247,5 @@ if __name__ == "__main__":
     
 
     networkingTool.send_update_player_request(player1)
+    
 

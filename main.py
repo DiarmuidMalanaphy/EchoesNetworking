@@ -1,5 +1,7 @@
+import sys
 import pygame
-from Handlers import keyHandler, mouseHandler, entityHandler,projectileHandler
+
+from Handlers import  mouseHandler, entityHandler,projectileHandler,keyHandler,networkHandler
 from Background import Background
 from Entities import *
 
@@ -7,7 +9,7 @@ import os
 
 class main:
     
-    def __init__(self):
+    def __init__(self,serverIP):
 
 
         pygame.init()
@@ -28,10 +30,12 @@ class main:
             
         
         
-        entity_handler = entityHandler.EntityHandler(background.entityArray)
+        entity_handler = entityHandler.EntityHandler(background.entityCount,entityMap=background.entityMap,background=background)
         key_handler = keyHandler.KeyHandler(background.player,background)
         projectile_handler = projectileHandler.ProjectileHandler()
         mouse_handler = mouseHandler.MouseHandler()
+        network_Handler = networkHandler.NetworkHandler(background.player,entity_handler,projectile_handler,serverIP)
+
 
         
         
@@ -44,6 +48,7 @@ class main:
                 mouse_handler.handleClicks(event,background.player)
                 if event.type == pygame.QUIT:
                     running = False
+                    network_Handler.removePlayer()
                 
                     
                                   
@@ -52,8 +57,11 @@ class main:
             keys = pygame.key.get_pressed()
             key_handler.handleKeys(keys,dt)
             self.screen.fill((0, 0, 0))
-            entity_handler.updateEntities(dt) # DRAW ALL HITBOXES
-            projectile_handler.update()
+            enemies = entity_handler.updateEntities(dt) # DRAW ALL HITBOXES
+            remove_list = projectile_handler.update(enemies)
+            network_Handler.update(remove_list,self.screen,background)
+            
+            
             background.updateMap() # Update light
 
             if background.player.dead:
@@ -79,8 +87,8 @@ class main:
             pygame.mixer.music.play()
 
         #story = False # SET TO FALSE FOR NO STORY
-        playMusic("audio/IntroSong.mp3")
-        pygame.mixer.Sound("audio/munch.mp3").play()
+        # playMusic("audio/IntroSong.mp3")
+        # pygame.mixer.Sound("audio/munch.mp3").play()
         storyImage = pygame.image.load(os.path.join("images/story0.png"))
         pressCount = 0
         TOTAL_STORY_FRAMES = 3
@@ -121,4 +129,10 @@ class main:
     
 if __name__ == "__main__":
 
-    main()
+    if len(sys.argv) > 1:
+        IP = sys.argv[1]  # Set the global IP variable
+    else:
+        print("No IP argument provided. Exiting.")
+        sys.exit(1)
+
+    main(IP)

@@ -2,7 +2,7 @@ package main
 
 type player struct {
 	ID        uint16
-	Direction uint8
+	Direction uint16
 	XPosition uint16
 	YPosition uint16
 	Health    int16

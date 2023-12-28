@@ -1,7 +1,7 @@
 import pygame
 import os
 import math
-from .projectiles import Projectile
+from .projectile import Projectile
 
 class Gun:
     # height and width attributes

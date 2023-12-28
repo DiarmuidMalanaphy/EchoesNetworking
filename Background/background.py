@@ -17,7 +17,8 @@ class Background:
         self.screenHeight = SCREEN_HEIGHT
         self.screenWidth = SCREEN_WIDTH
         self.hashMap = {}
-        self.entityArray  = self.createNewBackground()
+        
+        self.entityMap  = self.createNewBackground()
 
         self.lightDebug = False # SET FOR SHOWING LIGHT SOURCES
         
@@ -61,8 +62,10 @@ class Background:
         fogSurface = pygame.Surface((self.screenWidth, self.screenHeight), pygame.SRCALPHA)
 
         self.tileSize = self.screen.get_height()/self.dimension
-        entityArray = []
-        
+        entityMap = {}
+        self.entityCount = 1000
+
+        cobbleim = pygame.image.load("Background/images/cobble.png")
         for x in range(int (self.map.size/self.dimension)):
             for y in range(int (self.map.size/self.dimension)):
                 tileValue = self.map[x][y]
@@ -76,15 +79,15 @@ class Background:
                     
                    
                     if(randomNum<=60):
-                        image = pygame.image.load("Background/images/cobble.png")
+                        image = cobbleim
                     elif(randomNum<=79):
-                        image = pygame.image.load("Background/images/cobble.png")
+                        image = cobbleim
                     elif(randomNum<=83):
-                        image = pygame.image.load("Background/images/cobble.png")
+                        image = cobbleim
                     elif(randomNum<=88):
-                        image = pygame.image.load("Background/images/cobble.png")
+                        image = cobbleim
                     else:
-                        image = pygame.image.load("Background/images/cobble.png")
+                        image = cobbleim
                     tileObject = Tile(image,tileRect,255,x,y)
                     self.tileArray.append(tileObject)
                     self.hashMap[tileObject.key] = tileObject
@@ -115,7 +118,8 @@ class Background:
                 elif tileValue == 6:#humans
 
                     self.player = Player(self.screen,self,2,x= x*self.tileSize,y = y*self.tileSize)
-                    entityArray.append(self.player)
+                    entityMap[0] = self.player
+
                     
                     
                     pass
@@ -136,7 +140,7 @@ class Background:
                     
                     #pygame.draw.rect(self.screen, (0, 0, 0), tileRect)
                     #self.screen.blit(cobble, tileRect.topleft)
-        return(entityArray)        
+        return(entityMap)        
                 
                     
         

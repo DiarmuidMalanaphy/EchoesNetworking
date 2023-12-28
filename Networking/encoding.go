@@ -3,8 +3,10 @@ package main
 import (
 	"bytes"
 	"encoding/binary"
+	"fmt"
 	"io"
 	"net"
+	"reflect"
 )
 
 type networkData struct {
@@ -12,54 +14,84 @@ type networkData struct {
 	Addr    net.Addr
 }
 
-func generateRequest(players []player, reqType uint8) ([]byte, error) {
-	// First, serialize the players
-	// You have to do this because of the way binarisation works, if i didn't initially do this then i got issues with the
-	// changeable size of binarisation or something.
-	playerData, err := serialisePlayers(players)
-
+func generateRequest(data interface{}, reqType uint8) ([]byte, error) {
+	// First, serialize the data
+	serializedData, err := serialiseData(data)
 	if err != nil {
 		return nil, err
 	}
 
-	// Create a Request with the serialized player data as the payload
-	req := newRequest(reqType, playerData)
-	serialisedData, _ := serialiseRequest(req)
-	// Return the data with no errors.
-	return serialisedData, nil
+	// Create a Request with the serialized data as the payload
+	req := newRequest(reqType, serializedData)
+	serializedRequest, err := serialiseRequest(req)
+	if err != nil {
+		return nil, err
+	}
+
+	// Return the serialized request
+	return serializedRequest, nil
 }
 
-func serialisePlayers(players []player) ([]byte, error) {
+func serialiseData(data interface{}) ([]byte, error) {
 	buf := new(bytes.Buffer)
-	for _, p := range players {
-		err := binary.Write(buf, binary.LittleEndian, p)
+
+	v := reflect.ValueOf(data)
+	if v.Kind() == reflect.Slice {
+		// Handle slice serialization
+		for i := 0; i < v.Len(); i++ {
+			err := binary.Write(buf, binary.LittleEndian, v.Index(i).Interface())
+			if err != nil {
+				return nil, err
+			}
+		}
+	} else {
+		// Handle non-slice serialization
+		err := binary.Write(buf, binary.LittleEndian, data)
 		if err != nil {
 			return nil, err
 		}
 	}
+
 	return buf.Bytes(), nil
 }
 
 //Essentially the same process as serialisation except you get weird behaviour due to the fact it's really difficult to tell
 // where the end of the payload actually is.
 
-func deserialisePlayers(data []byte) ([]player, error) {
-	var players []player
+func deserialiseData(data []byte, dataType interface{}) error {
 	buf := bytes.NewReader(data)
-	// fmt.Printf("Received data length: %d bytes\n", len(data))
+	v := reflect.ValueOf(dataType)
 
-	for {
-		var p player
-		err := binary.Read(buf, binary.LittleEndian, &p)
-		if err == io.EOF {
-			break // End of data
-		}
-		if err != nil {
-			return nil, err
-		}
-		players = append(players, p)
+	// Check if dataType is a pointer
+	if v.Kind() != reflect.Ptr {
+		return fmt.Errorf("dataType must be a pointer")
 	}
-	return players, nil
+
+	v = v.Elem()
+
+	if v.Kind() == reflect.Slice {
+		// Handle slice deserialization
+		sliceElementType := v.Type().Elem()
+		for {
+			elemPtr := reflect.New(sliceElementType)
+			err := binary.Read(buf, binary.LittleEndian, elemPtr.Interface())
+			if err == io.EOF {
+				break // End of data
+			}
+			if err != nil {
+				return err
+			}
+			v.Set(reflect.Append(v, elemPtr.Elem()))
+		}
+	} else {
+		// Handle non-slice deserialization
+		err := binary.Read(buf, binary.LittleEndian, dataType)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // Type 1byte -> PayloadLength -> 4bytes -> PayloadBytes -> payload length to end.

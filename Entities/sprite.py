@@ -16,7 +16,8 @@ class Sprite:
     def __init__(self,screen,background,position,width=24,size= 24,colour="red",spriteImage = "Entities/images/player.png",rendered = False,health = 100):
         self.background = background
         self.screen = screen
-        self.spriteImage =  pygame.image.load(spriteImage)
+        self.spriteImage = pygame.image.load(spriteImage).convert_alpha()
+        
         self.startingPosition = Vector(position.x,position.y)
         self.maxHealth = health
         self.position = position

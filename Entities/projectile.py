@@ -5,6 +5,7 @@ from Vector import Vector
 class Projectile():
 
     boosted = False
+    local = True
 
     def deflect(self,xPosition1,xPosition2,yPosition1,yPosition2,xSpeed1,xSpeed2,ySpeed1,ySpeed2):
 
@@ -90,6 +91,24 @@ class Projectile():
                 if self.boosted == False:
                     self.boosted = self.player.addBoost(self.position.x-self.radius,self.position.y-self.radius,100,100)
                 self.bounces+=1
+
+    def hitPlayer(self, enemies):
+        hit = False
+        for enemy in enemies:
+            # Calculate the distance between the projectile and the enemy player
+            dx = self.position.x - enemy.position.x
+            dy = self.position.y - enemy.position.y
+            distance = math.sqrt(dx**2 + dy**2)
+            print(distance)
+
+            # Check if the distance is less than or equal to 0.5 units
+            if distance <= 10:
+                hit = True
+                break
+        print(hit)
+        return hit
+            
+
                 
 
     def update(self):
@@ -124,9 +143,61 @@ class Projectile():
 
         pygame.draw.arc(self.screen, color, (center_x - radius, center_y - radius, radius * 2, radius * 2), start_angle, end_angle, width)
 
-        
+    def isLocal(self):
+        return(self.local)
+    
+    @staticmethod
+    def from_payload(screen, background, projectile_payload, player,local = False):
+        """
+        Create a Projectile object from a projectile payload.
+
+        :param screen: The screen where the projectile will be rendered.
+        :param background: The background context of the projectile.
+        :param projectile_payload: An instance of ProjectilePayload or a tuple containing projectile data.
+        :param player: The Player object associated with this projectile.
+        :return: A Projectile object initialized with the provided data.
+        """
+        # Unpack the payload data
+        ProjectileID, PlayerID, GameID, XPosition, YPosition, Direction, XVelocity, YVelocity = projectile_payload
+
+        # Create a new Projectile instance
+        projectile = Projectile(
+            x=XPosition,
+            y=YPosition,
+            xVelocity=XVelocity,
+            yVelocity=YVelocity,
+            background=background,
+            screen=screen,
+            player=player
+        )
+
+        # Set additional attributes from payload
+        projectile.ID = ProjectileID
+        projectile.local = local
+        # Other attributes can be set here if needed
+
+        return projectile
+    
+    def update_from_network(self, projectile_payload):
+        """
+        Update the Projectile's attributes based on the received payload.
+
+        :param projectile_payload: An instance of ProjectilePayload containing the updated data.
+        """
+        # Assuming projectile_payload is either a ProjectilePayload instance or a tuple
+        if isinstance(projectile_payload, tuple):
+            # Unpack the tuple if a raw tuple is provided
+            self.ID, self.PlayerID, self.GameID, self.XPosition, self.YPosition, self.Direction, self.XVelocity, self.YVelocity = projectile_payload
+        else:
+            # Update from a ProjectilePayload object
+            self.ID = projectile_payload.ProjectileID
+            self.position.x = projectile_payload.XPosition
+            self.position.y = projectile_payload.YPosition
+            self.velocity.x = projectile_payload.XVelocity
+            self.velocity.y = projectile_payload.YVelocity
 
     def __init__(self, x, y,xVelocity,yVelocity,background,screen,player):
+        self.ID = 0
         self.position = pygame.Vector2(x,y)
         self.previousPosition = pygame.Vector2(x,y)
         self.velocity = pygame.Vector2(xVelocity,yVelocity)
