@@ -46,9 +46,13 @@ func sendUDP(address string, data []byte) error {
 	if err != nil {
 		return err
 	}
+	localAddr, err := net.ResolveUDPAddr("udp", ":8000")
+	if err != nil {
+		return err
+	}
 
 	// Establish a UDP connection
-	conn, err := net.DialUDP("udp", nil, udpAddr)
+	conn, err := net.DialUDP("udp", localAddr, udpAddr)
 	if err != nil {
 		return err
 	}

@@ -22,6 +22,9 @@ class Networking:
         # player_data = self.serialise_player(player)
         _,player_data = self.serialize_payload(player,StandardFormats.Player.value)
         response = self.__send_general_payload_request(RequestType.UpdatePlayer.value,player_data)
+
+        if response is None:
+            return None
         type, _ , payload = self.deserialise_request(response)
         if type == 255:
             return(None)
@@ -35,6 +38,8 @@ class Networking:
         # player_data = self.serialise_player(player)
         _,player_data = self.serialize_payload(player,StandardFormats.Player.value)
         response = self.__send_general_payload_request(RequestType.InitialisePlayer.value,player_data)
+        if response is None:
+            return None
         type, _ , payload = self.deserialise_request(response)
         if type == 255:
             return(None)
@@ -82,6 +87,8 @@ class Networking:
 
         # Send the combined byte stream
         response = self.__send_general_payload_request(RequestType.UpdateProjectiles.value, combined_serialized_data)
+        if response is None:
+            return None
         type, _, payload = self.deserialise_request(response)
 
         if type == 255:
@@ -141,8 +148,10 @@ class Networking:
                  # Player length should be 14 + 1(type) + payload length (4)
                 
 
-                #
+                sock.settimeout(0.5)
                 sock.sendto(request_data, (self.hostIP, self.hostPort))
+                local_ip, local_port = sock.getsockname()
+                # print(f"Listening on IP: {local_ip}, Port: {local_port}")
                 #start_time = time.time()
                 try:
                     response = sock.recv(1024)
@@ -155,6 +164,7 @@ class Networking:
                     
                 except socket.timeout:
                     print("Timeout: No response received")
+                    return(None)
                 
 
             except socket.error as e:

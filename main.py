@@ -133,6 +133,7 @@ if __name__ == "__main__":
         IP = sys.argv[1]  # Set the global IP variable
     else:
         print("No IP argument provided. Exiting.")
-        sys.exit(1)
-
+        # sys.exit(1)
+        IP = "82.6.12.81"
+        # IP = '127.0.0.1'
     main(IP)

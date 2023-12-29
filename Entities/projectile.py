@@ -99,13 +99,13 @@ class Projectile():
             dx = self.position.x - enemy.position.x
             dy = self.position.y - enemy.position.y
             distance = math.sqrt(dx**2 + dy**2)
-            print(distance)
+            
 
             # Check if the distance is less than or equal to 0.5 units
             if distance <= 10:
                 hit = True
                 break
-        print(hit)
+        
         return hit
             
 

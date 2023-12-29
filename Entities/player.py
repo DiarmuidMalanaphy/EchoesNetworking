@@ -146,8 +146,10 @@ class Player(Sprite):
             self.internetID = 0
             # print("pee2S")
             # print(self.to_player_payload().ID)
-            newPlayerInformation = self.networkTool.send_initialise_player_request(self.to_player_payload())[0]
-            # print(newPlayerInformation)
+            newPlayerInformation = None
+            while newPlayerInformation is None:
+                newPlayerInformation = self.networkTool.send_initialise_player_request(self.to_player_payload())
+            newPlayerInformation = newPlayerInformation[0]
             
             self.update_from_network(self.to_player_payload(payload = newPlayerInformation))
 
@@ -172,7 +174,11 @@ class Player(Sprite):
         # print("personal location", player_data_payload.xPosition)
         if player_data_payload:
             # print(player_data_payload)
-            return(self.networkTool.send_update_player_request(player_data_payload))
+            enemies = self.networkTool.send_update_player_request(player_data_payload)
+            if enemies is not None:
+
+                return(enemies)
+            return([])
         
     def removePlayer(self):
         player_data_payload = self.to_player_payload()
