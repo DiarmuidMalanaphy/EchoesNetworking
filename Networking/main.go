@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
-	"net/http"
 )
 
 // -> this standard will have to be relayed to the python too
@@ -28,9 +26,8 @@ func main() {
 	i := newIndex()
 	g := i.generateGame()
 
-	ip, _ := getPublicIP()
 	housekeepingCount := 0
-	fmt.Println("Running on IP:", ip)
+
 	// g2 := i.generateGame()
 	// fmt.Println(*g)
 
@@ -125,7 +122,7 @@ func main() {
 				var p []projectile
 				err := deserialiseData(req.Request.Payload, &p)
 				if err != nil {
-					outgoingReq, _ := generateRequest("pee", RequestFailure)
+					outgoingReq, _ := generateRequest(uint8(1), RequestFailure)
 					sendUDP(req.Addr.String(), outgoingReq)
 					continue
 				}
@@ -145,7 +142,7 @@ func main() {
 				var proj projectile
 				err := deserialiseData(req.Request.Payload, &proj)
 				if err != nil {
-					outgoingReq, _ := generateRequest("bug", RequestFailure)
+					outgoingReq, _ := generateRequest(uint8(1), RequestFailure)
 					sendUDP(req.Addr.String(), outgoingReq)
 					continue
 				}
@@ -159,7 +156,7 @@ func main() {
 				var p []projectile
 				err := deserialiseData(req.Request.Payload, &p)
 				if err != nil {
-					outgoingReq, _ := generateRequest("pee", RequestFailure)
+					outgoingReq, _ := generateRequest(uint8(1), RequestFailure)
 					sendUDP(req.Addr.String(), outgoingReq)
 					continue
 				}
@@ -175,7 +172,7 @@ func main() {
 				var p player
 				err := deserialiseData(req.Request.Payload, &p)
 				if err != nil {
-					outgoingReq, _ := generateRequest("pee", RequestFailure)
+					outgoingReq, _ := generateRequest(uint8(1), RequestFailure)
 					sendUDP(req.Addr.String(), outgoingReq)
 					continue
 				}
@@ -185,7 +182,8 @@ func main() {
 				sendUDP(req.Addr.String(), outgoingReq)
 
 			case RequestTypeValidateServer: //Essentially a ping.
-				outgoingReq, _ := generateRequest("pee", RequestSuccessful)
+				outgoingReq, _ := generateRequest(uint8(1), RequestSuccessful)
+
 				sendUDP(req.Addr.String(), outgoingReq)
 
 			}
@@ -193,16 +191,4 @@ func main() {
 		}
 	}
 
-}
-func getPublicIP() (string, error) {
-	resp, err := http.Get("https://api.ipify.org")
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-	ip, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
-	}
-	return string(ip), nil
 }

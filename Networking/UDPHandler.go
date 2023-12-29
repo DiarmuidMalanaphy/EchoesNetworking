@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net"
+	"net/http"
 	"os"
 )
 
@@ -22,7 +24,13 @@ func listen(reqChan chan<- networkData) {
 	defer conn.Close()
 	buffer := make([]byte, 1024)
 
-	fmt.Println("UDP server listening on port 8000...")
+	ip, err := getPublicIP()
+	if err != nil {
+		fmt.Println("Error getting public IP:", err)
+		return
+	}
+
+	fmt.Printf("UDP server listening on port 8000 and IP - %s\n", ip)
 	for {
 
 		n, remoteAddr, err := conn.ReadFromUDP(buffer)
@@ -30,7 +38,7 @@ func listen(reqChan chan<- networkData) {
 		req, err := deserialiseRequest(buffer[:n])
 
 		if err != nil {
-			fmt.Println(err)
+			// fmt.Println(""err)
 			continue
 		}
 
@@ -59,10 +67,24 @@ func sendUDP(address string, data []byte) error {
 	defer conn.Close()
 
 	// Send the data
+
 	_, err = conn.Write(data)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func getPublicIP() (string, error) {
+	resp, err := http.Get("https://api.ipify.org")
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	ip, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+	return string(ip), nil
 }

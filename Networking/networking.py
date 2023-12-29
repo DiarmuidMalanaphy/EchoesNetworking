@@ -138,6 +138,8 @@ class Networking:
     def send_validate_server_request(self):
         _, garbage_data = self.serialize_payload((1,1),"=BB")
         response = self.__send_general_payload_request(RequestType.ValidateServer.value,garbage_data)
+        
+        
         if response is None:
             return False
         return(True)
@@ -168,7 +170,7 @@ class Networking:
                  # Player length should be 14 + 1(type) + payload length (4)
                 
 
-                sock.settimeout(0.7)
+                sock.settimeout(0.5)
                 sock.sendto(request_data, (self.hostIP, self.hostPort))
                 local_ip, local_port = sock.getsockname()
                 # print(f"Listening on IP: {local_ip}, Port: {local_port}")
@@ -214,7 +216,7 @@ class Networking:
             return payload_length, serialized_data
 
         except struct.error as e:
-            print(payload)
+            
             raise ValueError(f"Payload does not match format '{format_string}': {e}")
         
 

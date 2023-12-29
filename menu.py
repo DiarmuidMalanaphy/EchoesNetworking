@@ -94,7 +94,9 @@ def on_advanced_setup(root):
 def confirm_and_use_ip(ip_address):
     if ip_address is not None:
         networkTool = networking.Networking(ip_address)
+
         if networkTool.send_validate_server_request():
+            root.destroy()
             script_path = 'minegoblinggame.py'
             process = subprocess.Popen([sys.executable, script_path,ip_address], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = process.communicate() 
