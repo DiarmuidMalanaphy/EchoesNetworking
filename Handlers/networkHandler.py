@@ -1,4 +1,7 @@
 from Networking import networking, playerPayload,projectilePayload
+
+import threading
+
 class NetworkHandler:
     def __init__(self,mainPlayer,entity_handler,projectile_handler,serverIP):  
         self.serverIP = serverIP 
@@ -15,29 +18,39 @@ class NetworkHandler:
         self.mainPlayer.initialisePlayerOnline(self.serverIP)
 
     def update(self,remove_list,screen,background):
-        for enemy in self.mainPlayer.retrieve_enemies():
-            self.entity_handler.updateOrAddEntity(enemy) 
+
+        enemy_thread = threading.Thread(target=self.threadToRetrieveEnemies, args=(self.mainPlayer, self.entity_handler))
+        enemy_thread.start()
+        projectile_thread = threading.Thread(target=self.projectileHandlingThread, args=(self.networkTool, remove_list,self.projectile_handler, self.mainPlayer, screen, background))
+        projectile_thread.start()
+        
+            
+    def threadToRetrieveEnemies(self,mainPlayer, entity_handler):
+
+        enemies = mainPlayer.retrieve_enemies()  # Retrieve enemies
+        for enemy in enemies:
+            entity_handler.updateOrAddEntity(enemy)
+
+    def projectileHandlingThread(self,networkTool,remove_list, projectile_handler, mainPlayer, screen, background):
+    
+        
+
         if remove_list:
-            for i in range(0,len(remove_list)):
-                remove_list[i] = projectilePayload.ProjectilePayload.from_projectile(remove_list[i])
-            self.networkTool.send_remove_projectile_request(remove_list)
-        locals = self.projectile_handler.get_locals()
+            remove_payload_list = [projectilePayload.ProjectilePayload.from_projectile(proj) for proj in remove_list]
+            networkTool.send_remove_projectile_request(remove_payload_list)
+
+        locals = projectile_handler.get_locals()
         if locals:
-            opponentProjectiles = self.networkTool.send_update_projectiles_request(locals) # -> this is if you're sending information in
-            
-            
+            opponentProjectiles = networkTool.send_update_projectiles_request(locals)
             if opponentProjectiles:
-                self.projectile_handler.takeOpposingProjectiles(opponentProjectiles,screen,background,self.mainPlayer)
-                
+                projectile_handler.takeOpposingProjectiles(opponentProjectiles, screen, background, mainPlayer)
         else:
-            opponentProjectiles = self.networkTool.send_request_projectiles_request(self.mainPlayer.to_player_payload()) # -> this is if you're just requesting information
-           
+            opponentProjectiles = networkTool.send_request_projectiles_request(mainPlayer.to_player_payload())
             if opponentProjectiles:
-                self.projectile_handler.takeOpposingProjectiles(opponentProjectiles,screen,background,self.mainPlayer)
-                
-                # print(op)
-            
-            
+                projectile_handler.takeOpposingProjectiles(opponentProjectiles, screen, background, mainPlayer)
+
+    
+
 
     def removePlayer(self):
         self.mainPlayer.removePlayer()

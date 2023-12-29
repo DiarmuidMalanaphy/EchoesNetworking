@@ -28,6 +28,7 @@ func main() {
 	g := i.generateGame()
 
 	ip, _ := getPublicIP()
+	housekeepingCount := 0
 	fmt.Println("Running on IP:", ip)
 	// g2 := i.generateGame()
 	// fmt.Println(*g)
@@ -51,6 +52,16 @@ func main() {
 		case req := <-requestChannel:
 
 			// fmt.Printf("Received request type: %+v from %s\n", req.Request.Type, req.Addr)
+			housekeepingCount++
+
+			// Check if the housekeepingCount has reached 10
+			if housekeepingCount >= 10 {
+				// Call the housekeeping function
+				i.houseKeeping()
+
+				// Reset the housekeeping count
+				housekeepingCount = 0
+			}
 
 			switch req.Request.Type {
 			//The first type of event is where the user is updating their characters position.

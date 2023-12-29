@@ -158,7 +158,7 @@ class Networking:
                  # Player length should be 14 + 1(type) + payload length (4)
                 
 
-                sock.settimeout(0.5)
+                sock.settimeout(0.7)
                 sock.sendto(request_data, (self.hostIP, self.hostPort))
                 local_ip, local_port = sock.getsockname()
                 # print(f"Listening on IP: {local_ip}, Port: {local_port}")
@@ -173,7 +173,7 @@ class Networking:
                     return(response)
                     
                 except socket.timeout:
-                    print("Timeout: No response received")
+                    # print("Timeout: No response received")
                     return(None)
                 
 

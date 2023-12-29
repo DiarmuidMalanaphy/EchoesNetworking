@@ -6,18 +6,20 @@ import "fmt"
 // The addplayer function
 
 type index struct {
-	playerMap    map[uint16]player
-	nextPlayerID uint16
-	gameMap      map[uint8]*game
-	nextGameID   uint8
+	playerMap        map[uint16]player
+	nextPlayerID     uint16
+	gameMap          map[uint8]*game
+	nextGameID       uint8
+	isPlayerAliveMap map[uint16]uint8 // Number of times the user hasn't updated if > 10 remove them. (housekeeping)
 }
 
 func newIndex() *index {
 	i := index{
-		playerMap:    make(map[uint16]player),
-		nextPlayerID: 1,
-		gameMap:      make(map[uint8]*game),
-		nextGameID:   1,
+		playerMap:        make(map[uint16]player),
+		nextPlayerID:     1,
+		gameMap:          make(map[uint8]*game),
+		nextGameID:       1,
+		isPlayerAliveMap: make(map[uint16]uint8),
 	}
 	return &i
 }
@@ -32,7 +34,7 @@ func (i *index) addPlayer(health int16, xPosition uint16, yPosition uint16, game
 	// -> health below zero
 
 	p := newPlayer(i.nextPlayerID, xPosition, yPosition, health, gameID)
-
+	i.isPlayerAliveMap[i.nextPlayerID] = 0
 	i.playerMap[i.nextPlayerID] = p
 	i.nextPlayerID = i.nextPlayerID + 1
 
@@ -69,6 +71,7 @@ func (i *index) updatePlayer(updatedPlayer player) {
 	// Check if the player exists in the playerMap
 	if _, exists := i.playerMap[updatedPlayer.ID]; exists {
 		// Replace the old player with the updated player in the map
+		i.isPlayerAliveMap[updatedPlayer.ID] = 0
 		i.playerMap[updatedPlayer.ID] = updatedPlayer
 		i.gameMap[updatedPlayer.Game].playerMap[updatedPlayer.ID] = updatedPlayer
 	} else {
@@ -83,6 +86,7 @@ func (i *index) updateProjectile(updatedProjectile projectile) {
 	if _, exists := i.gameMap[updatedProjectile.GameID].projectileMap[updatedProjectile.ProjectileID]; exists { //projectileMap[updatedProjectile.ProjectileID]; exists {
 		// Update the projectile in the projectileMap
 		// i.projectileMap[updatedProjectile.ProjectileID] = updatedProjectile
+		i.isPlayerAliveMap[updatedProjectile.PlayerID] = 0
 		i.gameMap[updatedProjectile.GameID].projectileMap[updatedProjectile.ProjectileID] = updatedProjectile
 		// If you also store projectiles in a game-specific map or any other structure, update it there as well
 		// i.gameMap[updatedProjectile.Game].projectileMap[updatedProjectile.ProjectileID] = updatedProjectile
@@ -126,4 +130,26 @@ func (i *index) generateGame() *game {
 func (i index) deleteGame() {
 	// -> This is going to be fucked, i need to decide if this deletes the players too.
 	// -> interesting design choice -> player being in game 0 means they go to lobby.
+}
+
+func (i index) houseKeeping() {
+	// -> going to have to delete all players not being updated
+	for playerID, inactiveCount := range i.isPlayerAliveMap {
+		// Increment the count of inactivity
+		i.isPlayerAliveMap[playerID]++
+
+		// Check if the inactivity count exceeds the threshold (e.g., 10)
+		if inactiveCount > 50 {
+			// Delete the player due to inactivity
+			i.deletePlayer(playerID)
+
+			// Optionally, you might want to perform additional actions,
+			// like logging or notifying that the player has been removed due to inactivity
+			fmt.Printf("Player with ID %d removed due to inactivity\n", playerID)
+		}
+	}
+	// ->go through playerMap and get each players ID
+	// go through the list of ids and increment the players count on isplayerAlivemap
+	// if isALivemapcount>10 remove them
+
 }
