@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -24,13 +25,19 @@ func listen(reqChan chan<- networkData) {
 	defer conn.Close()
 	buffer := make([]byte, 1024)
 
-	ip, err := getPublicIP()
+	publicIp, err := getPublicIP()
 	if err != nil {
 		fmt.Println("Error getting public IP:", err)
 		return
 	}
+	localIP, err := getLocalIP()
+	if err != nil {
+		fmt.Println("Error getting local IP address:", err)
+		return
+	}
 
-	fmt.Printf("UDP server listening on port 8000 and IP - %s\n", ip)
+	fmt.Printf("UDP server listening on port 8000 and IP - %s\n", publicIp)
+	fmt.Printf("Server local IP is - %s\n", localIP)
 	for {
 
 		n, remoteAddr, err := conn.ReadFromUDP(buffer)
@@ -87,4 +94,48 @@ func getPublicIP() (string, error) {
 		return "", err
 	}
 	return string(ip), nil
+}
+
+func getLocalIP() (string, error) {
+	interfaces, err := net.Interfaces()
+	if err != nil {
+		return "", err
+	}
+
+	for _, iface := range interfaces {
+		if iface.Flags&net.FlagUp == 0 {
+			continue // interface down
+		}
+		if iface.Flags&net.FlagLoopback != 0 {
+			continue // loopback interface
+		}
+
+		addrs, err := iface.Addrs()
+		if err != nil {
+			return "", err
+		}
+
+		for _, addr := range addrs {
+			var ip net.IP
+			switch v := addr.(type) {
+			case *net.IPNet:
+				ip = v.IP
+			case *net.IPAddr:
+				ip = v.IP
+			}
+
+			if ip == nil || ip.IsLoopback() {
+				continue
+			}
+
+			ip = ip.To4()
+			if ip == nil {
+				continue // not an ipv4 address
+			}
+
+			return ip.String(), nil
+		}
+	}
+
+	return "", errors.New("cannot find local IP address")
 }

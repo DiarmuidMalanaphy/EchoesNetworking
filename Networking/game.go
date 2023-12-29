@@ -50,7 +50,7 @@ func (g game) retrieveOpponents(playerID uint16) []player {
 		}
 
 	}
-	fmt.Println(players)
+
 	return players
 
 }

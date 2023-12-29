@@ -106,22 +106,30 @@ def confirm_and_use_ip(ip_address):
         messagebox.showerror("Error", "No IP address entered.", parent=root)
 
 def on_local_multiplayer(root):
-    print("Local Multiplayer selected.")
-    root.destroy()  # Close the Tkinter window
-    # Run minegoblin_game.py with '127.0.0.1' as the argument
-    script_path = 'minegoblinggame.py'  # Update this path
-    
+    # Clear the existing window
+    for widget in root.winfo_children():
+        widget.destroy()
 
+    # Setup the local multiplayer interface
+    root.configure(bg='#2B2B2B')
+    label = tk.Label(root, text="Local Multiplayer Setup", font=("Arial", 18, 'bold'), fg='white', bg='#2B2B2B')
+    label.pack(pady=20)
 
+    # Entry for IP Address
+    ip_label = tk.Label(root, text="Enter Server's Local IP Address:", font=("Arial", 12), fg='white', bg='#2B2B2B')
+    ip_label.pack(pady=5)
 
-    # try:
-    # subprocess.Popen([sys.executable, script_path, '127.0.0.1'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    process = subprocess.Popen([sys.executable, script_path, '127.0.0.1'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, stderr = process.communicate() 
-    # If i get rid of the process.communicate it stops working
+    ip_entry = tk.Entry(root, font=("Arial", 12), width=30)
+    ip_entry.pack(pady=5)
 
-    
-    #subprocess.Popen(['python', script_path, '127.0.0.1'])
+    # Confirm Button
+    confirm_button = tk.Button(root, text="Confirm IP", command=lambda: confirm_and_use_ip(ip_entry.get()), bg='#4CAF50', fg='white', font=("Arial", 14), pady=10)
+    confirm_button.pack(fill='x', padx=50, pady=5)
+
+    # Return to Main Menu Button
+    return_button = tk.Button(root, text="Return to Main Menu", command=lambda: return_to_main_menu(root), bg='#FF5722', fg='white', font=("Arial", 14), pady=10)
+    return_button.pack(fill='x', padx=50, pady=20)
+
 
 def return_to_main_menu(root):
     # Clear the existing window
