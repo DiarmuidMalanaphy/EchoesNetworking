@@ -50,6 +50,8 @@ class Networking:
     def send_remove_player_request(self,player):
         _,player_data = self.serialize_payload(player,StandardFormats.Player.value)
         response = self.__send_general_payload_request(RequestType.RemovePlayer.value,player_data)
+        if response is None:
+            return None
         type, _ , payload = self.deserialise_request(response)
         if type == 255:
             return(None)
@@ -60,6 +62,8 @@ class Networking:
     def send_initialise_game_request(self):
         _, game_data = self.serialize_payload((1,1),"=BB")
         response = self.__send_general_payload_request(RequestType.InitialiseGame.value,game_data)
+        if response is None:
+            return None
         type, _ , payload = self.deserialise_request(response)
         gameID = self.deserialize_payload(payload,"B")[0][0]
         
@@ -68,6 +72,8 @@ class Networking:
     def send_initialise_projectile_request(self,projectile): # <- on initialisation
         _,player_data = self.serialize_payload(projectile,StandardFormats.Projectile.value)
         response = self.__send_general_payload_request(RequestType.InitialiseProjectile.value,player_data)
+        if response is None:
+            return None
         type, _ , payload = self.deserialise_request(response)
         if type == 255:
             return(None)
@@ -100,6 +106,8 @@ class Networking:
     def send_request_projectiles_request(self,player): # Request all projectiles
         _,player_data = self.serialize_payload(player,StandardFormats.Player.value)
         response = self.__send_general_payload_request(RequestType.RequestProjectileInformation.value,player_data)
+        if response is None:
+            return None
         type, _ , payload = self.deserialise_request(response)
         if type == 255:
             return(None)
@@ -119,6 +127,8 @@ class Networking:
 
         # Send the combined byte stream
         response = self.__send_general_payload_request(RequestType.RemoveProjectiles.value, combined_serialized_data)
+        if response is None:
+            return None
         type, _, payload = self.deserialise_request(response)
 
         if type == 255:
@@ -227,6 +237,8 @@ class Networking:
 
     def deserialise_request(self, request_data):
         # Unpack the first 5 bytes for Type and payloadLength
+        if request_data is None:
+            return(None)
         
         type, payload_length = struct.unpack(StandardFormats.RequestHeader.value, request_data[:5])
 

@@ -48,7 +48,7 @@ class main:
                 mouse_handler.handleClicks(event,background.player)
                 if event.type == pygame.QUIT:
                     running = False
-                    network_Handler.removePlayer()
+                    
                 
                     
                                   
@@ -72,6 +72,7 @@ class main:
 
 
         # Done! Time to quit.
+        network_Handler.removePlayer()
         pygame.quit()
 
     def story(self,clock,story = False):

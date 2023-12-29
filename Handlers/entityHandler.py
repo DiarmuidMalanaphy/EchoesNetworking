@@ -49,7 +49,7 @@ class EntityHandler:
     
 
     def resetEntities(self,dt):
-        for key,entity in self.entityMap:
+        for key,entity in self.entityMap.items():
             entity.resetEntity(dt)
         
             

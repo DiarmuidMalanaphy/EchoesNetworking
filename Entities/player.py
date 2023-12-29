@@ -39,12 +39,17 @@ class Player(Sprite):
 
 
     def takeDamage(self, damage):
+        
         ###Play sound
-        pygame.mixer.Sound("Entities/audio/ow.mp3").play()
+        
         super().takeDamage(damage)
         if self.dead:
-            pygame.mixer.Sound("audio/giggle.mp3").play()
+            #pygame.mixer.Sound("audio/giggle.mp3").play()
+            self.rendered = False
+            pass
             ##Play dead noises
+        else:
+            pygame.mixer.Sound("Entities/audio/ow.mp3").play()
 
     def checkDead(self):
         return self.dead
