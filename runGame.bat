@@ -5,5 +5,5 @@ echo Done.
 
 echo starting the script
 
-python main.py 
+python menu.py
 pause

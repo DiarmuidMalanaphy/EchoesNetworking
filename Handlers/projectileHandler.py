@@ -15,7 +15,7 @@ class ProjectileHandler():
         del self.projectiles[proj.ID]
         
 
-    def update(self,enemies):
+    def update(self,enemies,player):
         removeList = []
         for _,proj in self.projectiles.items():
 
@@ -23,7 +23,7 @@ class ProjectileHandler():
             
 
             
-            if remove or proj.hitPlayer(enemies):
+            if remove or proj.hitPlayer(enemies,player):
                 removeList.append(proj)
                 continue
             proj.draw()

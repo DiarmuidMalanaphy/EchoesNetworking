@@ -17,6 +17,7 @@ const (
 	RequestTypeAddProjectile      = uint8(7)
 	RequestTypeRemoveProjectiles  = uint8(8)
 	RequestTypeRequestProjectiles = uint8(9)
+	RequestTypeValidateServer     = uint8(10)
 
 	RequestSuccessful = uint8(200)
 	RequestFailure    = uint8(255)
@@ -181,6 +182,10 @@ func main() {
 				opposingProjectiles := i.gameMap[p.Game].getOpposingProjectiles(p.ID)
 				outgoingReq, _ := generateRequest(opposingProjectiles, RequestSuccessful)
 
+				sendUDP(req.Addr.String(), outgoingReq)
+
+			case RequestTypeValidateServer: //Essentially a ping.
+				outgoingReq, _ := generateRequest("pee", RequestSuccessful)
 				sendUDP(req.Addr.String(), outgoingReq)
 
 			}

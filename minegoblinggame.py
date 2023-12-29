@@ -58,7 +58,7 @@ class main:
             key_handler.handleKeys(keys,dt)
             self.screen.fill((0, 0, 0))
             enemies = entity_handler.updateEntities(dt) # DRAW ALL HITBOXES
-            remove_list = projectile_handler.update(enemies)
+            remove_list = projectile_handler.update(enemies,background.player)
             network_Handler.update(remove_list,self.screen,background)
             
             

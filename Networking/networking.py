@@ -135,6 +135,16 @@ class Networking:
             return False
         return True
     
+    def send_validate_server_request(self):
+        _, garbage_data = self.serialize_payload((1,1),"=BB")
+        response = self.__send_general_payload_request(RequestType.ValidateServer.value,garbage_data)
+        if response is None:
+            return False
+        return(True)
+        
+        
+        
+    
 
 
     
@@ -204,6 +214,7 @@ class Networking:
             return payload_length, serialized_data
 
         except struct.error as e:
+            print(payload)
             raise ValueError(f"Payload does not match format '{format_string}': {e}")
         
 

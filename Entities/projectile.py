@@ -5,7 +5,7 @@ from Vector import Vector
 class Projectile():
 
     boosted = False
-    local = True
+    
 
     def deflect(self,xPosition1,xPosition2,yPosition1,yPosition2,xSpeed1,xSpeed2,ySpeed1,ySpeed2):
 
@@ -92,7 +92,7 @@ class Projectile():
                     self.boosted = self.player.addBoost(self.position.x-self.radius,self.position.y-self.radius,100,100)
                 self.bounces+=1
 
-    def hitPlayer(self, enemies):
+    def hitPlayer(self, enemies,mainPlayer):
         hit = False
         for enemy in enemies:
             # Calculate the distance between the projectile and the enemy player
@@ -102,10 +102,22 @@ class Projectile():
             
 
             # Check if the distance is less than or equal to 0.5 units
-            if distance <= 10:
+            if distance <= 15:
                 hit = True
                 break
         
+        if not hit and not self.isLocal():
+            dx = self.position.x - mainPlayer.position.x
+            dy = self.position.y - mainPlayer.position.y
+            distance = math.sqrt(dx**2 + dy**2)
+            
+
+            # Check if the distance is less than or equal to 0.5 units
+            if distance <= 25:
+                hit = True
+                mainPlayer.takeDamage(math.sqrt(self.velocity.x**2+self.velocity.y**2)*3)
+        
+        print(hit)
         return hit
             
 
@@ -173,7 +185,7 @@ class Projectile():
 
         # Set additional attributes from payload
         projectile.ID = ProjectileID
-        projectile.local = local
+        projectile.local = False
         # Other attributes can be set here if needed
 
         return projectile
@@ -198,6 +210,7 @@ class Projectile():
 
     def __init__(self, x, y,xVelocity,yVelocity,background,screen,player):
         self.ID = 0
+        self.local = True
         self.position = pygame.Vector2(x,y)
         self.previousPosition = pygame.Vector2(x,y)
         self.velocity = pygame.Vector2(xVelocity,yVelocity)

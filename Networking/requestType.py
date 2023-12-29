@@ -11,5 +11,6 @@ class RequestType(Enum):
     InitialiseProjectile = 7
     RemoveProjectiles = 8
     RequestProjectileInformation = 9
+    ValidateServer = 10
     RequestSuccessful = 200
     RequestFailed = 255
