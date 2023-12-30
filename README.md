@@ -43,9 +43,9 @@ Playing the game.
 
 ## Networking Class (Python)
 
-## Main Function (Go)
+### Description
 
-- **Manages game and player states**, listens for network requests, and handles them based on request type. This includes player updates, game generation, player removal, and projectile management.
+- **Manages game and player states**, comprehensive API that facilitates server-client communication for a game, involving player and projectile interactions.
 
 ### Player Interaction
 - `send_initialise_player_request`: **Initializes a player** and returns player data.
