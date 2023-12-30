@@ -17,10 +17,10 @@ The motivation behind this extension was to test a low-memory-usage backend for 
 
 ## Installation & Setup
 **Prerequisites**
-  To run the server.
-    - You must have Golang installed, https://go.dev/doc/install.
-  To run the game
-    - You must have Python installed, https://www.python.org/downloads/.
+  To run the server:
+    - You must have Golang installed. Visit [Golang Installation](https://go.dev/doc/install) for instructions.
+  To run the game:
+    - You must have Python installed. Visit [Python Downloads](https://www.python.org/downloads/) for instructions.
  
 Follow these steps to set up the project:
 
