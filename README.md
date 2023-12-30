@@ -30,7 +30,9 @@ The motivation behind this extension was to test a low-memory-usage backend for 
 Follow these steps to set up the project:
 
 The Game follows a Client-Server Model.
-Setting up the server.
+
+#### Setting up the server.
+
    **Local Multiplayer** - Run the server and play across the same local network.
 1. Run the bat or bash script "runServer"
 2. The terminal should display a local IP address, this is what you will need to type in to find the lobby later on.
@@ -39,7 +41,7 @@ Setting up the server.
 2. Run the bat or bash script "runServer"
 3. The terminal should display a public IP address, this is what you will need to type in to find the lobby later on.
 
-Playing the game.
+#### Playing the game.
 
 1. Ensure a server is running, only one server has to be running.
 2. Run the bat or bash script runGame
