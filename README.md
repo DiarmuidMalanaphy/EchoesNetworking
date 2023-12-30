@@ -22,15 +22,14 @@ The motivation behind this extension was to test a low-memory-usage backend for 
     
   To run the game:
     - You must have Python installed. Visit [Python Downloads](https://www.python.org/downloads/) for instructions.
- 
+
+  To access the code:
+    - git clone https://github.com/DiarmuidMalanaphy/EchoesNetworking
+  ### Setting up the game
+
 Follow these steps to set up the project:
 
 The Game follows a Client-Server Model.
-
-Both processes begin with cloning the Github - the command is
-
-git clone https://github.com/DiarmuidMalanaphy/EchoesNetworking
-
 Setting up the server.
    **Local Multiplayer** - Run the server and play across the same local network.
 1. Run the bat or bash script "runServer"
