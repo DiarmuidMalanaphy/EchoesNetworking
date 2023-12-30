@@ -182,6 +182,7 @@ func main() {
 				sendUDP(req.Addr.String(), outgoingReq)
 
 			case RequestTypeValidateServer: //Essentially a ping.
+				fmt.Println(1)
 				outgoingReq, _ := generateRequest(uint8(1), RequestSuccessful)
 
 				sendUDP(req.Addr.String(), outgoingReq)

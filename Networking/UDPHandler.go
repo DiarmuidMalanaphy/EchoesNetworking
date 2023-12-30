@@ -1,12 +1,12 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
+	"strings"
 )
 
 func listen(reqChan chan<- networkData) {
@@ -103,11 +103,8 @@ func getLocalIP() (string, error) {
 	}
 
 	for _, iface := range interfaces {
-		if iface.Flags&net.FlagUp == 0 {
-			continue // interface down
-		}
-		if iface.Flags&net.FlagLoopback != 0 {
-			continue // loopback interface
+		if iface.Flags&net.FlagUp == 0 || iface.Flags&net.FlagLoopback != 0 {
+			continue // Interface down or loopback
 		}
 
 		addrs, err := iface.Addrs()
@@ -124,18 +121,19 @@ func getLocalIP() (string, error) {
 				ip = v.IP
 			}
 
-			if ip == nil || ip.IsLoopback() {
+			// Skip loopback and undefined addresses
+			if ip == nil || ip.IsLoopback() || ip.To4() == nil {
 				continue
 			}
 
-			ip = ip.To4()
-			if ip == nil {
-				continue // not an ipv4 address
-			}
+			ipStr := ip.String()
 
-			return ip.String(), nil
+			// Check if the IP address is from a common virtual network range
+			if !strings.HasPrefix(ipStr, "192.168.56.") {
+				return ipStr, nil
+			}
 		}
 	}
 
-	return "", errors.New("cannot find local IP address")
+	return "", fmt.Errorf("cannot find local IP address")
 }

@@ -1,7 +1,5 @@
 package main
 
-import "fmt"
-
 type game struct {
 	ID               uint8
 	playerMap        map[uint16]player
@@ -62,6 +60,6 @@ func (g game) getOpposingProjectiles(playerID uint16) []projectile {
 			opposingProjectiles = append(opposingProjectiles, proj)
 		}
 	}
-	fmt.Println(opposingProjectiles)
+
 	return opposingProjectiles
 }
