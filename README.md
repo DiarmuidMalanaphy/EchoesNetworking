@@ -34,9 +34,12 @@ The Game follows a Client-Server Model.
 #### Setting up the server.
 
    **Local Multiplayer** - Run the server and play across the same local network.
+   
 1. Run the bat or bash script "runServer"
 2. The terminal should display a local IP address, this is what you will need to type in to find the lobby later on.
-   **Global Multiplayer**
+   
+   **Global Multiplayer** - Run the server and play across the internet.
+   
 1. The server computer will have to enable portforwarding to port 8000 on the local machine. There are guides online, here is one https://www.wikihow.com/Set-Up-Port-Forwarding-on-a-Router.
 2. Run the bat or bash script "runServer"
 3. The terminal should display a public IP address, this is what you will need to type in to find the lobby later on.
