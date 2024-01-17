@@ -5,6 +5,8 @@ This project extends a simple game, originally developed over a weekend, where p
 
 The motivation behind this extension was to test a low-memory-usage backend for a larger upcoming project. Golang was chosen for its efficiency in memory usage and effectiveness in web development, aligning with the goals of creating a scalable and robust multiplayer experience.
 
+The project combines Golang and Python so the networking uses the low level socket interface for both.
+
 ## Technologies & Frameworks Used
 - **Server**: Golang
 - **Client**: Python
